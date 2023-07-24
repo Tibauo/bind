@@ -1,0 +1,36 @@
+---
+# tasks file for bind
+- name: install bind
+  ansible.builtin.dnf:
+    name:
+      - bind
+      - bind-utils
+    state: present
+
+- name: delete named.conf
+  ansible.builtin.file:
+    path: /etc/named.conf
+    state: absent
+
+- name: push name.conf
+  ansible.builtin.template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+
+- name: push forward
+  ansible.builtin.template:
+    src: forward.conf.j2
+    dest: "/var/named/{{ item.name }}.db"
+  loop: "{{ forwardzone }}"
+
+- name: push reverse
+  ansible.builtin.template:
+    src: reverse.conf.j2
+    dest: "/var/named/{{ item.name }}.db"
+  loop: "{{ reversezone }}"
+
+- name: restart named
+  ansible.builtin.service:
+    name: named
+    enabled: yes
+    state: restarted

@@ -1,0 +1,17 @@
+$TTL 86400
+@   IN  SOA     bind.{{ domain_name }}. root.{{ domain_name }}.(
+                                       20230           ;Serial
+                                       3600        ;Refresh
+                                       1800        ;Retry
+                                       604800      ;Expire
+                                       86400       ;Minimum TTL
+)
+
+;Name Server Information
+@         IN      NS         bind.{{ domain_name }}.
+bind      IN      A          {{ listen_address }}
+
+;Reverse lookup for Name Server
+{% for def in reversezone[0].def %}
+{{ def.last_digit }}       IN  {{ def.record }}     {{ def.name }}.{{ domain_name }}.
+{% endfor %}
